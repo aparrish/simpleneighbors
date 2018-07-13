@@ -1,7 +1,7 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-
+dist: xenial
 python:
   - "pypy3"
   - "pypy"
@@ -21,8 +21,8 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - coverage run --source pronouncing setup.py test --verbose
-  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then python -m doctest pronouncing/__init__.py; fi
+  - coverage run --source simpleneighbors setup.py test --verbose
+  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then python -m doctest simpleneighbors/__init__.py; fi
 
 after_success:
 - pip install coveralls
