@@ -20,7 +20,7 @@ install:
 # command to run tests, e.g. python setup.py test
 script:
   - coverage run --source simpleneighbors setup.py test --verbose
-  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then python -m doctest simpleneighbors/__init__.py; fi
+  - python -m doctest simpleneighbors/__init__.py
 
 after_success:
 - pip install coveralls
