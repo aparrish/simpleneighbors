@@ -1,11 +1,9 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-dist: xenial
 python:
   - "pypy3"
   - "pypy"
-  - "3.7"
   - "3.6"
   - "3.5"
   - "3.4"
