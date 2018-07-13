@@ -11,7 +11,7 @@ setup(
     author='Allison Parrish',
     author_email='allison@decontextualize.com',
     url='https://github.com/aparrish/simpleneighbors',
-    description='A simple interface for nearest-neighbors lookup',
+    description='A clean and easy interface for nearest-neighbors lookup',
     long_description=readme + "\n\n" + history,
     classifiers=[
         'Development Status :: 3 - Alpha',
