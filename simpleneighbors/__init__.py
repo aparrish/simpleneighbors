@@ -74,11 +74,11 @@ class SimpleNeighbors:
         .. doctest:
 
             >>> from simpleneighbors import SimpleNeighbors
-            >>> sim = SimpleNeighbors(3)
-            >>> sim.feed([('red', (255, 0, 0)),
-            ...     ('green', (0, 255, 0)),
-            ...     ('blue', (0, 0, 255),
-            ...     ('cyan', (0, 255, 255))])
+            >>> sim = SimpleNeighbors(2, 'euclidean')
+            >>> sim.feed([('a', (4, 5)),
+            ...     ('b', (0, 3)),
+            ...     ('c', (-2, 8)),
+            ...     ('d', (2, -2))])
             >>> len(sim)
             4
 
@@ -115,14 +115,14 @@ class SimpleNeighbors:
         .. doctest::
 
             >>> from simpleneighbors import SimpleNeighbors
-            >>> sim = SimpleNeighbors(3)
-            >>> sim.feed([('red', (255, 0, 0)),
-            ...     ('green', (0, 255, 0)),
-            ...     ('blue', (0, 0, 255),
-            ...     ('cyan', (0, 255, 128))])
+            >>> sim = SimpleNeighbors(2, 'euclidean')
+            >>> sim.feed([('a', (4, 5)),
+            ...     ('b', (0, 3)),
+            ...     ('c', (-2, 8)),
+            ...     ('d', (2, -2))])
             >>> sim.build()
-            >>> sim.nearest((200, 0, 0), n=1)
-            ['red']
+            >>> sim.nearest((1, -1), n=1)
+            ['d']
 
         :param vec: search vector
         :param n: number of results to return
@@ -143,14 +143,14 @@ class SimpleNeighbors:
         .. doctest::
 
             >>> from simpleneighbors import SimpleNeighbors
-            >>> sim = SimpleNeighbors(3)
-            >>> sim.feed([('red', (255, 0, 0)),
-            ...     ('green', (0, 255, 0)),
-            ...     ('blue', (0, 0, 255),
-            ...     ('cyan', (0, 255, 128))])
+            >>> sim = SimpleNeighbors(2, 'euclidean')
+            >>> sim.feed([('a', (4, 5)),
+            ...     ('b', (0, 3)),
+            ...     ('c', (-2, 8)),
+            ...     ('d', (2, -2))])
             >>> sim.build()
-            >>> sim.neighbors('cyan', n=3)
-            ['cyan', 'blue', 'green']
+            >>> sim.neighbors('b', n=3)
+            ['b', 'a', 'c']
 
         :param item: a data item in that has already been added to the index
         :param n: the number of items to return
@@ -180,15 +180,15 @@ class SimpleNeighbors:
         .. doctest::
 
             >>> from simpleneighbors import SimpleNeighbors
-            >>> sim = SimpleNeighbors(3)
-            >>> sim.feed([('red', (255, 0, 0)),
-            ...     ('green', (0, 255, 0)),
-            ...     ('blue', (0, 0, 255),
-            ...     ('cyan', (0, 255, 128))])
+            >>> sim = SimpleNeighbors(2, 'euclidean')
+            >>> sim.feed([('a', (4, 5)),
+            ...     ('b', (0, 3)),
+            ...     ('c', (-2, 8)),
+            ...     ('d', (2, -2))])
             >>> sim.build()
-            >>> list(sim.nearest_matching((0, 128, 128), n=1,
-            ...     check=lambda x: len(x) == 4))
-            ['blue']
+            >>> list(sim.nearest_matching((3.5, 4.5), n=1,
+            ...     check=lambda x: ord(x) <= ord('b')))
+            ['a']
 
         :param vec: search vector
         :param n: number of items to return

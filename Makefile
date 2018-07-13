@@ -39,6 +39,7 @@ lint:
 
 test:
 	python setup.py test
+	python -m doctest simpleneighbors/__init__.py
 
 test-all:
 	tox
