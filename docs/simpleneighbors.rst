@@ -1,8 +1,5 @@
-simpleneighbors package
-=======================
-
-Module contents
----------------
+Simple Neighbors API Reference
+==============================
 
 .. automodule:: simpleneighbors
     :members:

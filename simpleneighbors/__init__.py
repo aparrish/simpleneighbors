@@ -5,22 +5,23 @@ __author__ = 'Allison Parrish'
 __email__ = 'allison@decontextualize.com'
 __version__ = '0.0.1'
 
-class SimpleNeighbors:
-    
-    def __init__(self, dims, metric="angular"):
-        """Initializes a SimpleNeighbors index.
 
-        You need to specify the number of dimensions in your data (i.e., the
-        length of the list or array you plan to provide for each item) and the
-        distance metric you want to use. (The default is "angular" distance,
-        i.e., cosine distance. You might also want to try "euclidean" for
-        Euclidean distance.) Both of these parameters are passed directly to
-        Annoy; see `the Annoy documentation <https://pypi.org/project/annoy/>`
-        for more details.
-        
-        :param dims: the number of dimensions in your data
-        :param metric: the distance metric to use
-        """
+class SimpleNeighbors:
+    """A Simple Neighbors index.
+
+    You need to specify the number of dimensions in your data (i.e., the
+    length of the list or array you plan to provide for each item) and the
+    distance metric you want to use. (The default is "angular" distance,
+    i.e., cosine distance. You might also want to try "euclidean" for
+    Euclidean distance.) Both of these parameters are passed directly to
+    Annoy; see `the Annoy documentation <https://pypi.org/project/annoy/>`_
+    for more details.
+
+    :param dims: the number of dimensions in your data
+    :param metric: the distance metric to use
+    """
+
+    def __init__(self, dims, metric="angular"):
         self.dims = dims
         self.metric = metric
         self.id_map = {}
@@ -28,18 +29,18 @@ class SimpleNeighbors:
         self.annoy = annoy.AnnoyIndex(dims, metric=metric)
         self.i = 0
         self.built = False
-        
+
     def add_one(self, item, vector):
         """Adds an item to the index.
 
-        Add one item to the index. You need to provide the item to add and a
-        vector that corresponds to that item. (For example, if the item is 
-        the name of a color, the vector might be a (R, G, B) triplet
-        corresponding to that color. If the item is a word, the vector might be
-        a word2vec or GloVe vector corresponding to that word.
+        You need to provide the item to add and a vector that corresponds to
+        that item. (For example, if the item is the name of a color, the vector
+        might be a (R, G, B) triplet corresponding to that color. If the item
+        is a word, the vector might be a word2vec or GloVe vector corresponding
+        to that word.
 
         Items can be any `hashable
-        <https://docs.python.org/3.7/glossary.html#term-hashable>` Python
+        <https://docs.python.org/3.7/glossary.html#term-hashable>`_ Python
         object. Vectors must be sequences of numbers. (Lists, tuples, and Numpy
         arrays should all be fine, for example.)
 
@@ -51,12 +52,12 @@ class SimpleNeighbors:
         :returns: None
         """
 
-        assert self.built == False, "Index already built; can't add new items."
+        assert self.built is False, "Index already built; can't add new items."
         self.annoy.add_item(self.i, vector)
         self.id_map[item] = self.i
         self.corpus.append(item)
         self.i += 1
-        
+
     def feed(self, items):
         """Add multiple items to the index.
 
@@ -66,7 +67,7 @@ class SimpleNeighbors:
         once.
 
         Items can be any `hashable
-        <https://docs.python.org/3.7/glossary.html#term-hashable>` Python
+        <https://docs.python.org/3.7/glossary.html#term-hashable>`_ Python
         object. Vectors must be sequences of numbers. (Lists, tuples, and Numpy
         arrays should all be fine, for example.)
 
@@ -86,7 +87,7 @@ class SimpleNeighbors:
         """
         for item, vector in items:
             self.add_one(item, vector)
-            
+
     def build(self, n=10):
         """Build the index.
 
@@ -102,7 +103,7 @@ class SimpleNeighbors:
         """
         self.annoy.build(n)
         self.built = True
-                    
+
     def nearest(self, vec, n=12):
         """Returns the items nearest to a given vector.
 
@@ -128,9 +129,9 @@ class SimpleNeighbors:
         :returns: a list of items sorted in order of proximity
         """
 
-        return [self.corpus[idx] for idx \
+        return [self.corpus[idx] for idx
                 in self.annoy.get_nns_by_vector(vec, n)]
-            
+
     def neighbors(self, item, n=12):
         """Returns the items nearest another item in the index.
 
@@ -157,14 +158,15 @@ class SimpleNeighbors:
         """
 
         return self.nearest(self.vec(item), n)
-            
-    def nearest_matching(self, vec, n=12, check=None):
-        """Returns the items nearest a given vector that pass a test.
+
+    def nearest_matching(self, vec, n=12, check=lambda x: True):
+        """nearest_matching(vec, n=12, check=lambda x: True)
+        Returns the items nearest a given vector that pass a test.
 
         This method looks for the items in the index nearest the given vector
-        that meet a particular criterion. It tries to find at least ``n`` items,
-        expanding the search as needed.  (It may yield fewer than the desired
-        number if enough items can't be found in the entire index.)
+        that meet a particular criterion. It tries to find at least ``n``
+        items, expanding the search as needed.  (It may yield fewer than the
+        desired number if enough items can't be found in the entire index.)
 
         The function passed as ``check`` will be called with a single
         parameter: the item in question. It should return ``True`` if the item
@@ -194,8 +196,6 @@ class SimpleNeighbors:
         :returns: a generator yielding up to ``n`` items
         """
 
-        if check is None:
-            check = lambda x: True
         found = set()
         current_n = n
         while True:
@@ -209,7 +209,7 @@ class SimpleNeighbors:
                 break
             else:
                 current_n *= 2
-                
+
     def neighbors_matching(self, item, n=12, check=None):
         """Returns the items nearest an indexed item that pass a test.
 
@@ -226,7 +226,7 @@ class SimpleNeighbors:
 
         for item in self.nearest_matching(self.vec(item), n, check):
             yield item
-            
+
     def dist(self, a, b):
         """Returns the distance between two items.
 
@@ -235,7 +235,7 @@ class SimpleNeighbors:
         :returns: distance between ``a`` and ``b``
         """
         return self.annoy.get_distance(self.id_map[a], self.id_map[b])
-    
+
     def vec(self, item):
         """Returns the vector for an item
 
@@ -248,20 +248,20 @@ class SimpleNeighbors:
         :returns: vector for item
         """
         return self.annoy.get_item_vector(self.id_map[item])
-    
+
     def __len__(self):
         """Returns the number of items in the vector"""
         return len(self.corpus)
-    
+
     def save(self, prefix):
         """Saves the index to disk.
 
-        This method saves the index to disk. Annoy indexes can't be pickled, so
-        this method produces two files: the serialized Annoy index, and a
-        pickle with the other data from the object. This method's parameter
-        specifies the "prefix" to use for these files. The Annoy index will be
-        saved as ``<prefix>.annoy`` and the object data will be saved as
-        ``<prefix>-data.pkl``.
+        This method saves the index to disk. Annoy indexes can't be serialized
+        with `pickle`, so this method produces two files: the serialized Annoy
+        index, and a pickle with the other data from the object. This method's
+        parameter specifies the "prefix" to use for these files. The Annoy
+        index will be saved as ``<prefix>.annoy`` and the object data will be
+        saved as ``<prefix>-data.pkl``.
 
         :param prefix: filename prefix for Annoy index and object data
         :returns: None
@@ -278,7 +278,7 @@ class SimpleNeighbors:
                 'dims': self.dims
             }, fh)
         self.annoy.save(prefix + ".annoy")
-        
+
     @classmethod
     def load(cls, prefix):
         """Restores a previously-saved index.
@@ -302,4 +302,3 @@ class SimpleNeighbors:
         newobj.built = data['built']
         newobj.annoy.load(prefix + ".annoy")
         return newobj
-

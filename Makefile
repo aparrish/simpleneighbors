@@ -44,14 +44,12 @@ test-all:
 	tox
 
 coverage:
-	coverage run --source simpleneighbots setup.py test
+	coverage run --source simpleneighbors setup.py test
 	coverage report -m
 	coverage html
 	python -m webbrowser htmlcov/index.html
 
 docs:
-	rm -f docs/simpleneighbors.rst
-	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ simpleneighbors
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
