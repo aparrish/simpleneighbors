@@ -7,7 +7,7 @@ with open('HISTORY.rst') as history_file:
 
 setup(
     name='simpleneighbors',
-    version='0.0.1',
+    version='0.1.0',
     author='Allison Parrish',
     author_email='allison@decontextualize.com',
     url='https://github.com/aparrish/simpleneighbors',
@@ -26,8 +26,12 @@ setup(
     package_dir={'simpleneighbors': 'simpleneighbors'},
     packages=['simpleneighbors'],
     install_requires=[
-        'annoy'
     ],
+    extras_require={
+        'annoy': ['annoy>=1.16.0'],
+        'sklearn': ['scikit-learn>=0.20'],
+        'purepython': []
+    },
     platforms='any',
     test_suite='tests'
 )

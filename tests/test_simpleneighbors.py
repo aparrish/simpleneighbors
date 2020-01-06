@@ -4,6 +4,8 @@ from os.path import join as opj
 from shutil import rmtree
 
 from simpleneighbors import SimpleNeighbors
+from simpleneighbors.backends import BruteForcePurePython, Annoy, Sklearn
+from simpleneighbors.backends.base import BaseBackend
 
 data = [
     ('mahogany', (74, 1, 0)),
@@ -39,15 +41,17 @@ class TestSimpleNeighbors(unittest.TestCase):
     def tearDownClass(cls):
         rmtree(cls.tmpdir)
        
-    def make_sim(self):
-        sim = SimpleNeighbors(3)
+    def make_sim(self, backend=None):
+        sim = SimpleNeighbors(3, metric='angular', backend=backend)
         sim.feed(data)
         sim.add_one(*one_more)
         sim.build(20)
         return sim
 
     def workflow(self, sim):
-        
+
+        print("running backend", sim.backend)
+
         self.assertRaises(AssertionError,
                 sim.add_one, *one_more)
         # +1 because of the call to test .add_one above
@@ -76,16 +80,14 @@ class TestSimpleNeighbors(unittest.TestCase):
                 "%0.5f" % sim.dist('topaz', 'dusk'),
                 "0.45335")
 
-
     def test_workflow(self):
-        sim = self.make_sim()
-        self.workflow(sim)
+        for backend in Annoy, BruteForcePurePython, Sklearn:
+            sim = self.make_sim(backend)
+            self.workflow(sim)
+            sim.save(opj(self.tmpdir, 'neighbortest'))
+            sim2 = SimpleNeighbors.load(opj(self.tmpdir, 'neighbortest'))
+            self.workflow(sim2)
 
-    def test_save_load(self):
-        sim = self.make_sim()
-        sim.save(opj(self.tmpdir, 'neighbortest'))
-        sim2 = SimpleNeighbors.load(opj(self.tmpdir, 'neighbortest'))
-        self.workflow(sim2)
 
 if __name__ == '__main__':
     unittest.main()

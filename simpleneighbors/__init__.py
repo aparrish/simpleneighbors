@@ -1,32 +1,44 @@
 import pickle
-import annoy
+from simpleneighbors.backends import select_best
 
 __author__ = 'Allison Parrish'
 __email__ = 'allison@decontextualize.com'
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 class SimpleNeighbors:
     """A Simple Neighbors index.
 
-    You need to specify the number of dimensions in your data (i.e., the
-    length of the list or array you plan to provide for each item) and the
-    distance metric you want to use. (The default is "angular" distance,
-    i.e., cosine distance. You might also want to try "euclidean" for
-    Euclidean distance.) Both of these parameters are passed directly to
-    Annoy; see `the Annoy documentation <https://pypi.org/project/annoy/>`_
-    for more details.
+    This class wraps backend implementations of approximate nearest neighbors
+    indexes with a user-friendly API. When you instantiate this class, it will
+    automatically select a backend implementation based on packages installed
+    in your environment. It is HIGHLY RECOMMENDED that you install Annoy (``pip
+    install annoy``) to enable the Annoy backend! (The alternatives are 
+    slower and not as accurate.) Alternatively, you can specify a backend of
+    your choosing with the ``backend`` parameter.
+
+    Specify the number of dimensions in your data (i.e., the length of the list
+    or array you plan to provide for each item) and the distance metric you
+    want to use. The default is ``angular`` distance, an approximation of
+    cosine distance. This metric is supported by all backends, as is
+    ``euclidean`` (for Euclidean distance). Both of these parameters are passed
+    directly to the backend; see the backend documentation for more details.
 
     :param dims: the number of dimensions in your data
     :param metric: the distance metric to use
+    :param backend: the nearest neighbors backend to use (default is annoy)
     """
 
-    def __init__(self, dims, metric="angular"):
+    def __init__(self, dims, metric="angular", backend=None):
+
+        if backend is None:
+            backend = select_best()
+
         self.dims = dims
         self.metric = metric
         self.id_map = {}
         self.corpus = []
-        self.annoy = annoy.AnnoyIndex(dims, metric=metric)
+        self.backend = backend(dims, metric=metric)
         self.i = 0
         self.built = False
 
@@ -53,7 +65,7 @@ class SimpleNeighbors:
         """
 
         assert self.built is False, "Index already built; can't add new items."
-        self.annoy.add_item(self.i, vector)
+        self.backend.add_item(self.i, vector)
         self.id_map[item] = self.i
         self.corpus.append(item)
         self.i += 1
@@ -88,20 +100,25 @@ class SimpleNeighbors:
         for item, vector in items:
             self.add_one(item, vector)
 
-    def build(self, n=10):
+    def build(self, n=10, params=None):
         """Build the index.
 
-        After adding all of your items, call this method to build
-        the index. The specified parameter controls the number of trees in the
-        underlying Annoy index; a higher number will take longer to build but
-        provide more precision when querying.
+        After adding all of your items, call this method to build the index.
+        The meaning of parameter ``n`` is different for each backend
+        implementation. For the Annoy backend, it specifies the number of trees
+        in the underlying Annoy index (a higher number will take longer to
+        build but provide more precision when querying). For the Sklearn
+        backend, the number specifies the leaf size when building the ball
+        tree. (The Brute Force Pure Python backend ignores this value
+        entirely.)
 
         After you call build, you'll no longer be able to add new items to the
         index.
 
         :param n: number of trees
+        :param params: dictionary with extra parameters to pass to backend
         """
-        self.annoy.build(n)
+        self.backend.build(n, params)
         self.built = True
 
     def nearest(self, vec, n=12):
@@ -130,7 +147,7 @@ class SimpleNeighbors:
         """
 
         return [self.corpus[idx] for idx
-                in self.annoy.get_nns_by_vector(vec, n)]
+                in self.backend.get_nns_by_vector(vec, n)]
 
     def neighbors(self, item, n=12):
         """Returns the items nearest another item in the index.
@@ -234,10 +251,10 @@ class SimpleNeighbors:
         :param b: second item
         :returns: distance between ``a`` and ``b``
         """
-        return self.annoy.get_distance(self.id_map[a], self.id_map[b])
+        return self.backend.get_distance(self.id_map[a], self.id_map[b])
 
     def vec(self, item):
-        """Returns the vector for an item
+        """Returns the vector for an item.
 
         This method returns the vector that was originally provided when
         indexing the specified item. (Depending on how it was originally
@@ -247,7 +264,7 @@ class SimpleNeighbors:
         :param item: item to lookup
         :returns: vector for item
         """
-        return self.annoy.get_item_vector(self.id_map[item])
+        return self.backend.get_item_vector(self.id_map[item])
 
     def __len__(self):
         """Returns the number of items in the vector"""
@@ -256,12 +273,14 @@ class SimpleNeighbors:
     def save(self, prefix):
         """Saves the index to disk.
 
-        This method saves the index to disk. Annoy indexes can't be serialized
-        with `pickle`, so this method produces two files: the serialized Annoy
-        index, and a pickle with the other data from the object. This method's
-        parameter specifies the "prefix" to use for these files. The Annoy
-        index will be saved as ``<prefix>.annoy`` and the object data will be
-        saved as ``<prefix>-data.pkl``.
+        This method saves the index to disk. Each backend manages serialization
+        a little bit differently: consult the documentation and source code for
+        more details. For example, because Annoy indexes can't be serialized
+        with `pickle`, the Annoy backend's implementation produces two files:
+        the serialized Annoy index, and a pickle with the other data from the
+        object.
+        
+        This method's parameter specifies the "prefix" to use for these files.
 
         :param prefix: filename prefix for Annoy index and object data
         :returns: None
@@ -275,9 +294,10 @@ class SimpleNeighbors:
                 'i': self.i,
                 'built': self.built,
                 'metric': self.metric,
-                'dims': self.dims
+                'dims': self.dims,
+                '_backend_class': self.backend.__class__
             }, fh)
-        self.annoy.save(prefix + ".annoy")
+        self.backend.save(prefix + ".idx")
 
     @classmethod
     def load(cls, prefix):
@@ -286,7 +306,7 @@ class SimpleNeighbors:
         This class method restores a previously-saved index using the specified
         file prefix.
 
-        :param prefix: prefix for AnnoyIndex file and object data pickle
+        :param prefix: prefix used when saving
         :returns: SimpleNeighbors object restored from specified files
         """
 
@@ -294,11 +314,12 @@ class SimpleNeighbors:
             data = pickle.load(fh)
         newobj = cls(
             dims=data['dims'],
-            metric=data['metric']
+            metric=data['metric'],
+            backend=data['_backend_class']
         )
         newobj.id_map = data['id_map']
         newobj.corpus = data['corpus']
         newobj.i = data['i']
         newobj.built = data['built']
-        newobj.annoy.load(prefix + ".annoy")
+        newobj.backend.load(prefix + ".idx")
         return newobj
