@@ -30,7 +30,14 @@ setup(
     extras_require={
         'annoy': ['annoy>=1.16.0'],
         'sklearn': ['scikit-learn>=0.20'],
-        'purepython': []
+        'purepython': [],
+        'dev': [
+            'annoy>=1.16.0',
+            'scikit-learn>=0.20',
+            'mock;python_version<="2.7"',
+            'coverage',
+            'flake8',
+        ]
     },
     platforms='any',
     test_suite='tests'
