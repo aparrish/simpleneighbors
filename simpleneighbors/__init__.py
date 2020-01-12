@@ -13,7 +13,7 @@ class SimpleNeighbors:
     indexes with a user-friendly API. When you instantiate this class, it will
     automatically select a backend implementation based on packages installed
     in your environment. It is HIGHLY RECOMMENDED that you install Annoy (``pip
-    install annoy``) to enable the Annoy backend! (The alternatives are 
+    install annoy``) to enable the Annoy backend! (The alternatives are
     slower and not as accurate.) Alternatively, you can specify a backend of
     your choosing with the ``backend`` parameter.
 
@@ -279,7 +279,7 @@ class SimpleNeighbors:
         with `pickle`, the Annoy backend's implementation produces two files:
         the serialized Annoy index, and a pickle with the other data from the
         object.
-        
+
         This method's parameter specifies the "prefix" to use for these files.
 
         :param prefix: filename prefix for Annoy index and object data

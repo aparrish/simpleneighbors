@@ -1,13 +1,14 @@
 from simpleneighbors.backends.base import BaseBackend
 import pickle
 
+
 class Sklearn(BaseBackend):
 
     @classmethod
     def available(cls):
         try:
-            from sklearn.neighbors import NearestNeighbors
-            import numpy as np
+            from sklearn.neighbors import NearestNeighbors  # noqa: F401
+            import numpy as np  # noqa: F401
         except ImportError:
             return False
         return True
@@ -18,7 +19,7 @@ class Sklearn(BaseBackend):
 
     def add_item(self, idx, vector):
         self.items.append([float(d) for d in vector])
-        
+
     def build(self, n, params=None):
         from sklearn.neighbors import NearestNeighbors
         from sklearn.preprocessing import normalize
@@ -26,7 +27,7 @@ class Sklearn(BaseBackend):
         data = np.array(self.items)
         if self.metric == 'angular':
             data = normalize(data, norm='l2')
-            metric = 'minkowski' # equivalent to euclidean
+            metric = 'minkowski'  # equivalent to euclidean
         else:
             metric = self.metric
         if params is None:
@@ -49,7 +50,7 @@ class Sklearn(BaseBackend):
         import numpy as np
         X = np.array([self.items[a_idx], self.items[b_idx]])
         if self.metric == 'angular':
-            X= normalize(X, norm='l2')
+            X = normalize(X, norm='l2')
             metric = 'minkowski'
         else:
             metric = self.metric
@@ -68,5 +69,3 @@ class Sklearn(BaseBackend):
             obj = pickle.load(fh)
         self.items = obj[0]
         self.nn = obj[1]
-
-

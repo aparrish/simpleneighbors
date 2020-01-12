@@ -1,6 +1,7 @@
 from simpleneighbors import SimpleNeighbors
 from simpleneighbors.backends import available
 
+
 def benchmark(n=10000, dims=300, query_count=10, metric='angular'):
     import numpy as np
     from time import time
@@ -20,7 +21,8 @@ def benchmark(n=10000, dims=300, query_count=10, metric='angular'):
             sim.nearest(np.random.randn(dims))
         nearest_query = time()
         print(backend, "%0.2f sec to build, %0.2f sec to query %d items" %
-                (to_build - start, nearest_query - start, query_count))
+              (to_build - start, nearest_query - start, query_count))
+
 
 if __name__ == '__main__':
 

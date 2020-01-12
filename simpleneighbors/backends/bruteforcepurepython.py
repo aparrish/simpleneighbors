@@ -1,11 +1,13 @@
 from simpleneighbors.backends.base import BaseBackend
 from math import sqrt
 import pickle
+
 try:
     from functools import lru_cache
-except:
+except ImportError:
     # for python 2, NOP lru_cache
     from functools import wraps
+
     def lru_cache(maxsize=10000):
         def deco(fn):
             @wraps(fn)
@@ -14,21 +16,26 @@ except:
             return wrapper
         return deco
 
+
 @lru_cache(maxsize=10000)
 def distance(coord1, coord2):
     return sqrt(sum([(i - j)**2 for i, j in zip(coord1, coord2)]))
 
+
 def norm(vec):
     return sqrt(sum([item**2 for item in vec]))
+
 
 @lru_cache(maxsize=10000)
 def normalize(vec):
     norm_val = norm(vec)
     return tuple(item / norm_val for item in vec)
 
+
 @lru_cache(maxsize=10000)
 def norm_dist(v1, v2):
     return distance(normalize(v1), normalize(v2))
+
 
 class BruteForcePurePython(BaseBackend):
 
@@ -73,4 +80,3 @@ class BruteForcePurePython(BaseBackend):
             obj = pickle.load(fh)
         self.items = obj.items
         self.dist_fn = obj.dist_fn
-

@@ -16,6 +16,7 @@ scikit-learn (pip install scikit-learn). Doing so will make the corresponding
 backends available to you and will improve performance dramatically.
 """
 
+
 def select_best():
     for b in (Annoy, Sklearn):
         if b.available():
@@ -23,6 +24,6 @@ def select_best():
     warnings.warn(brute_force_message)
     return BruteForcePurePython
 
+
 def available():
     return [Annoy, Sklearn, BruteForcePurePython]
-

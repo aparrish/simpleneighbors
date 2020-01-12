@@ -30,6 +30,7 @@ data = [
 
 one_more = ('purpley', (135, 86, 228))
 
+
 class TestSimpleNeighbors(unittest.TestCase):
 
     @classmethod
@@ -39,7 +40,7 @@ class TestSimpleNeighbors(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         rmtree(cls.tmpdir)
-       
+
     def make_sim(self, backend=None):
         sim = SimpleNeighbors(3, metric='angular', backend=backend)
         sim.feed(data)
@@ -51,8 +52,8 @@ class TestSimpleNeighbors(unittest.TestCase):
 
         print("running backend", sim.backend)
 
-        self.assertRaises(AssertionError,
-                sim.add_one, *one_more)
+        self.assertRaises(AssertionError, sim.add_one, *one_more)
+
         # +1 because of the call to test .add_one above
         self.assertEqual(len(sim), len(data) + 1)
 
@@ -67,12 +68,11 @@ class TestSimpleNeighbors(unittest.TestCase):
             sim.nearest([100, 100, 200], 3),
             ['dusk', 'purpley', 'french blue'])
 
-        nm = list(sim.neighbors_matching('mint', 1,
-            lambda x: 'a' in x))
+        nm = list(sim.neighbors_matching('mint', 1, lambda x: 'a' in x))
         self.assertEqual(nm[0], 'battleship grey')
 
         nm = list(sim.nearest_matching([100, 100, 200], 1,
-            lambda x: x.startswith('p')))
+                  lambda x: x.startswith('p')))
         self.assertEqual(nm[0], 'purpley')
 
         self.assertEqual(
@@ -90,4 +90,3 @@ class TestSimpleNeighbors(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
