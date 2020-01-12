@@ -115,7 +115,7 @@ class SimpleNeighbors:
         After you call build, you'll no longer be able to add new items to the
         index.
 
-        :param n: number of trees
+        :param n: backend-dependent (for Annoy: number of trees)
         :param params: dictionary with extra parameters to pass to backend
         """
         self.backend.build(n, params)

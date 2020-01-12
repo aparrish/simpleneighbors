@@ -5,7 +5,6 @@ from shutil import rmtree
 
 from simpleneighbors import SimpleNeighbors
 from simpleneighbors.backends import BruteForcePurePython, Annoy, Sklearn
-from simpleneighbors.backends.base import BaseBackend
 
 data = [
     ('mahogany', (74, 1, 0)),
