@@ -2,8 +2,8 @@
 
 language: python
 python:
-  - "pypy3"
-  - "pypy"
+  - "3.8"
+  - "3.7"
   - "3.6"
   - "3.5"
   - "3.4"
@@ -14,12 +14,12 @@ sudo: false
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - pip install -r requirements.txt
+  - pip install -e .[dev]
   - pip install coverage
 
 # command to run tests, e.g. python setup.py test
 script:
-  - coverage run --source simpleneighbors setup.py test --verbose
+  - coverage run --source simpleneighbors tests/test_simpleneighbors.py --verbose
   - python -m doctest simpleneighbors/__init__.py
 
 after_success:
@@ -28,6 +28,4 @@ after_success:
 
 after_script:
 - coverage report                     # show coverage on cmd line
-- pip install pycodestyle pyflakes
-- pyflakes . | tee >(wc -l)           # static analysis
-- pycodestyle --statistics --count .  # static analysis
+- flake8 simpleneighbors tests

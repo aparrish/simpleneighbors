@@ -4,6 +4,7 @@ from os.path import join as opj
 from shutil import rmtree
 
 from simpleneighbors import SimpleNeighbors
+from simpleneighbors.backends import BruteForcePurePython, Annoy, Sklearn
 
 data = [
     ('mahogany', (74, 1, 0)),
@@ -29,6 +30,7 @@ data = [
 
 one_more = ('purpley', (135, 86, 228))
 
+
 class TestSimpleNeighbors(unittest.TestCase):
 
     @classmethod
@@ -38,18 +40,20 @@ class TestSimpleNeighbors(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         rmtree(cls.tmpdir)
-       
-    def make_sim(self):
-        sim = SimpleNeighbors(3)
+
+    def make_sim(self, backend=None):
+        sim = SimpleNeighbors(3, metric='angular', backend=backend)
         sim.feed(data)
         sim.add_one(*one_more)
         sim.build(20)
         return sim
 
     def workflow(self, sim):
-        
-        self.assertRaises(AssertionError,
-                sim.add_one, *one_more)
+
+        print("running backend", sim.backend)
+
+        self.assertRaises(AssertionError, sim.add_one, *one_more)
+
         # +1 because of the call to test .add_one above
         self.assertEqual(len(sim), len(data) + 1)
 
@@ -64,29 +68,25 @@ class TestSimpleNeighbors(unittest.TestCase):
             sim.nearest([100, 100, 200], 3),
             ['dusk', 'purpley', 'french blue'])
 
-        nm = list(sim.neighbors_matching('mint', 1,
-            lambda x: 'a' in x))
+        nm = list(sim.neighbors_matching('mint', 1, lambda x: 'a' in x))
         self.assertEqual(nm[0], 'battleship grey')
 
         nm = list(sim.nearest_matching([100, 100, 200], 1,
-            lambda x: x.startswith('p')))
+                  lambda x: x.startswith('p')))
         self.assertEqual(nm[0], 'purpley')
 
         self.assertEqual(
                 "%0.5f" % sim.dist('topaz', 'dusk'),
                 "0.45335")
 
-
     def test_workflow(self):
-        sim = self.make_sim()
-        self.workflow(sim)
+        for backend in Annoy, BruteForcePurePython, Sklearn:
+            sim = self.make_sim(backend)
+            self.workflow(sim)
+            sim.save(opj(self.tmpdir, 'neighbortest'))
+            sim2 = SimpleNeighbors.load(opj(self.tmpdir, 'neighbortest'))
+            self.workflow(sim2)
 
-    def test_save_load(self):
-        sim = self.make_sim()
-        sim.save(opj(self.tmpdir, 'neighbortest'))
-        sim2 = SimpleNeighbors.load(opj(self.tmpdir, 'neighbortest'))
-        self.workflow(sim2)
 
 if __name__ == '__main__':
     unittest.main()
-
