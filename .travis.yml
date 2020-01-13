@@ -21,7 +21,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - coverage run --source simpleneighbors setup.py test --verbose
+  - coverage run --source simpleneighbors tests/test_simpleneighbors.py --verbose
   - python -m doctest simpleneighbors/__init__.py
 
 after_success:

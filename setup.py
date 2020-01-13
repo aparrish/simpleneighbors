@@ -32,7 +32,6 @@ setup(
         'sklearn': ['scikit-learn>=0.20'],
         'purepython': [],
         'dev': [
-            'numpy==1.15.4',  # see https://github.com/numpy/numpy/issues/14012
             'annoy>=1.16.0',
             'scikit-learn>=0.20',
             'mock;python_version<="2.7"',
