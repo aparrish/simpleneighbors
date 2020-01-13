@@ -24,7 +24,7 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
     package_dir={'simpleneighbors': 'simpleneighbors'},
-    packages=['simpleneighbors'],
+    packages=['simpleneighbors', 'simpleneighbors.backends'],
     install_requires=[
     ],
     extras_require={
